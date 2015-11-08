@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.awt.*;
 import java.awt.event.*;
-
 import javax.swing.*;
 
 public class Server extends JFrame{
@@ -50,7 +49,7 @@ public class Server extends JFrame{
 					setupStreams();
 					whileChatting();					
 				} catch (EOFException e) {
-					System.err.println("\nServer: Server ended connection !");
+					System.err.println("\nSERVER: Server ended connection !");
 				}finally {
 					closeCrap();
 				}
@@ -62,9 +61,9 @@ public class Server extends JFrame{
 	
 	// wait for connection, then display connection information
 	private void waitForConnection() throws IOException{
-		showMessage("Server: waiting for someone to connect...\n");
+		showMessage("SERVER: waiting for someone to connect...\n");
 		connection = server.accept();
-		showMessage("Server: now connected to "+ connection.getInetAddress().getHostName());
+		showMessage("SERVER: now connected to "+ connection.getInetAddress().getHostName());
 	}
 	
 	// get stream to send and receive data
@@ -72,12 +71,12 @@ public class Server extends JFrame{
 		output = new ObjectOutputStream(connection.getOutputStream());
 		output.flush();
 		input = new ObjectInputStream(connection.getInputStream());
-		showMessage("Server: Streams are now setup ! \n");
+		showMessage("SERVER: Streams are now setup ! \n");
 	}
 	
 	// during the chat conversation
 	private void whileChatting() throws IOException{
-		String message = "Server : You are now connected !";
+		String message = "SERVER : You are now connected !";
 		sendMessage(message);
 		ableToType(true);
 		
@@ -87,7 +86,7 @@ public class Server extends JFrame{
 				message = (String) input.readObject();
 				showMessage("\n" + message);
 			}catch(ClassNotFoundException classNotFound) {
-				showMessage("\nServer: Server can't read the Client message !");
+				showMessage("\nSERVER: Server can't read the Client message !");
 			}
 		}while(!message.equals("CLIENT - END"));
 	}
