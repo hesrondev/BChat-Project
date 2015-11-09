@@ -2,6 +2,8 @@ package com.hesrondev.bchat.server;
 
 import java.io.Serializable;
 
+import org.json.simple.JSONObject;
+
 public class ServerMessage {
 	
 	private final String typeMessage;
@@ -19,6 +21,25 @@ public class ServerMessage {
 	public ServerMessage(String type, String message) {
 		this.typeMessage = type;
 		this.message = message;
+	}
+	
+	// convert message to JSON-String format
+	
+	@SuppressWarnings("unchecked")
+	public String toString() {
+		String jsonString = "";
+		JSONObject json = new JSONObject();
+	
+		json.put("typeMessage", typeMessage);
+		json.put("senderName", senderName);
+		json.put("senderID", senderID);
+		json.put("receiverName", receiverName);
+		json.put("receiverID", receiverID);
+		json.put("message", message);
+		
+		jsonString = json.toString();
+		
+		return jsonString;
 	}
 
 	
