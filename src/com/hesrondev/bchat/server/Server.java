@@ -93,7 +93,7 @@ class Server extends JFrame{
 	}
 	
 	// update chatWindow
-	protected void showMessage(final String text) {
+	protected synchronized void showMessage(final String text) {
 		SwingUtilities.invokeLater(
 			new Runnable(){
 				public void run(){
