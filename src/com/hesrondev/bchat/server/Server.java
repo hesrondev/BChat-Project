@@ -2,6 +2,8 @@ package com.hesrondev.bchat.server;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -21,6 +23,7 @@ class Server extends JFrame{
 	protected String name;
 	
 	// List of connections
+	private List<ClientProcessor> connections = new ArrayList<ClientProcessor>();
 	
 	// Constructor
 	
@@ -75,7 +78,9 @@ class Server extends JFrame{
 		
 		ClientProcessor clientProcessor = new ClientProcessor(connection);
 		clientProcessor.addServerListener(this);
-		// Add to the LIST
+		
+		// Add to the list of connections
+		addConnection(clientProcessor);
 		
 		Thread clthread = new Thread(clientProcessor);
 		clthread.start();
@@ -84,7 +89,13 @@ class Server extends JFrame{
 		ableToType(true);
 	}
 	
-	// Broadcast method
+	// Broadcast message to all connected clients
+	protected synchronized void broadcast(String msg) {
+		
+		for (ClientProcessor cnx : connections) {
+			cnx.sendData(msg);
+		}
+	}
 	
 	
 	// send a message to client
@@ -112,5 +123,13 @@ class Server extends JFrame{
 					}
 				}
 			);
+	}
+	
+	
+	// Connections management
+	
+	protected void addConnection(ClientProcessor cp) {
+		connections.add(cp);
+		showMessage("New connection... /number : "+ connections.size());
 	}
 }
