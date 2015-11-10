@@ -89,15 +89,15 @@ class Server extends JFrame{
 	
 	// send a message to client
 	private void sendMessage(ClientProcessor client, String message){
-		client.sendMessage(message);
+		client.sendData(message);
 	}
 	
 	// update chatWindow
-	protected synchronized void showMessage(final String text) {
+	protected void showMessage(final String text) {
 		SwingUtilities.invokeLater(
 			new Runnable(){
 				public void run(){
-					chatWindow.append(text);
+					chatWindow.append("\n"+text);
 				}
 			}
 		);
