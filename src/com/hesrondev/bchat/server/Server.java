@@ -4,7 +4,12 @@ import java.io.*;
 import java.net.*;
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Server extends JFrame{
 	
@@ -24,7 +29,7 @@ public class Server extends JFrame{
 		userText.setEditable(false);
 		userText.addActionListener(	new ActionListener() {
 					public void actionPerformed(ActionEvent event) {
-						sendMessage(event.getActionCommand());
+						sendMessage(output, event.getActionCommand());
 						userText.setText("");
 					}
 		});
@@ -76,19 +81,73 @@ public class Server extends JFrame{
 	
 	// during the chat conversation
 	private void whileChatting() throws IOException{
+		
 		String message = "SERVER : You are now connected !";
-		sendMessage(message);
+		sendMessage(output, (new ServerMessage(ServerMessage.MSG, message)).toString());
+		
 		ableToType(true);
 		
 		do{
 			// have a conversation
 			try{
 				message = (String) input.readObject();
-				showMessage("\n" + message);
+				messageProcessing(message);
 			}catch(ClassNotFoundException classNotFound) {
 				showMessage("\nSERVER: Server can't read the Client message !");
 			}
-		}while(!message.equals("CLIENT - END"));
+		}while(connection.isConnected());
+	}
+	
+	// Parse the received message from JSON to String and treat according to the type of message
+	private void messageProcessing(String jsonMessage) {
+		
+		JSONParser parser = new JSONParser();	
+			
+		try{
+			Object obj = parser.parse(jsonMessage);
+			JSONObject json = (JSONObject)obj;
+			
+			String type = (String)json.get("typeMessage");
+			String senderName = (String)json.get("senderName");	
+			String senderID =  (String)json.get("senderID");
+			String receivedMsg = (String)json.get("message");
+			
+			System.out.println("Server RECEIVES : "+ type +" : "+ senderName +" : "+ senderID +" : "+ receivedMsg);
+			
+			// Test the type of message cases
+			
+			String message = "";
+				
+			switch(type) {
+					
+				case "LOGOUT":			
+					showMessage("\n"+senderName + " : " + receivedMsg);
+					message = setServerResponse(type, senderName, senderID);					
+					sendMessage(output, message);
+					break;
+					
+				case "SERVER_REQUEST":		
+					showMessage("\n"+senderName + " : " + receivedMsg);
+					message = setServerResponse(type, senderName, senderID);					
+					sendMessage(output, message);
+					break;
+					
+				case "MSG":
+					showMessage("\n"+senderName + " : " + receivedMsg);					
+					sendMessage(output, jsonMessage);
+					// BROADCASTING  !!!
+					// broadcast(jsonMessage);
+					break;
+					
+				default:
+					showMessage("Incorrect ClientMessage type!\n");
+					break;						
+			}
+			
+		}catch(ParseException pe){
+			System.err.println("position : "+ pe.getPosition());
+			System.err.println(pe);
+		}
 	}
 	
 	// close streams and sockets
@@ -104,8 +163,41 @@ public class Server extends JFrame{
 		}
 	}
 	
+	// configure a server response ---> Methode in clientProcess class
+	private String setServerResponse(String type, String clientName, String clientID){
+		
+		String tm = "";
+		String msg = "";
+		
+		switch(type) {
+							
+			case "LOGOUT":			
+				tm = ServerMessage.DISCONNECT;
+				msg = "You have been disconnected!";				
+				break;
+				
+			case "SERVER_REQUEST":		
+				tm = ServerMessage.MSG;
+				msg = "Server Request here! Not implemented yet... sorry.";
+				break;
+				
+			default:
+				showMessage("Incorrect ClientMessage type!\n");
+				break;						
+		}
+		
+		ServerMessage sm = new ServerMessage(tm, msg);
+		sm.setSenderName("Server-Chat");
+		sm.setSenderID(connection.getInetAddress().getHostAddress());
+		sm.setReceiverName(clientName);
+		sm.setReceiverID(clientID);
+		
+		return sm.toString();
+		
+	}
+	
 	// send a message to client
-	private void sendMessage(String message){
+	private void sendMessage(ObjectOutputStream output, String message){
 		try{
 			output.writeObject("SERVER [message]:"+ message);
 			output.flush();

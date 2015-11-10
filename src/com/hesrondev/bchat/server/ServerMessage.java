@@ -1,7 +1,5 @@
 package com.hesrondev.bchat.server;
 
-import java.io.Serializable;
-
 import org.json.simple.JSONObject;
 
 public class ServerMessage {
@@ -14,7 +12,7 @@ public class ServerMessage {
 	private String receiverID = "no_id";
 	
 	// Type of messages to the client
-	public static String ID="IDResponse", MSG="MSG"; 
+	public static final String MSG="MSG", DISCONNECT="DISCONNECT"; 
 	
 	// Constructor
 	
