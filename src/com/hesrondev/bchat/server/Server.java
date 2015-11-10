@@ -29,7 +29,10 @@ public class Server extends JFrame{
 		userText.setEditable(false);
 		userText.addActionListener(	new ActionListener() {
 					public void actionPerformed(ActionEvent event) {
-						sendMessage(output, event.getActionCommand());
+						String text = event.getActionCommand();
+						
+						sendMessage(output, (new ServerMessage(ServerMessage.MSG, text)).toString());
+						
 						userText.setText("");
 					}
 		});
@@ -199,9 +202,8 @@ public class Server extends JFrame{
 	// send a message to client
 	private void sendMessage(ObjectOutputStream output, String message){
 		try{
-			output.writeObject("SERVER [message]:"+ message);
+			output.writeObject(message);
 			output.flush();
-			showMessage("SERVER [message]:"+ message);
 		}catch(IOException ioe){
 			chatWindow.append("\n ERROR: I can't send that message");
 		}
